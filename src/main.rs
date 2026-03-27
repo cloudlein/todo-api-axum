@@ -5,10 +5,6 @@ use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
-use axum::extract::State;
-use axum::{Json, Router};
-use axum::routing::{get, post};
-use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone)]
 struct Todo {
@@ -128,76 +124,4 @@ async fn delete_todos(
     }
 }
 
-async fn update_todos(
-    Path(id): Path<u32>,
-    State(todos): State<SharedTodos>,
-    Json(payload): Json<Todo>
-) -> Result<Json<Todo>, StatusCode> {
-    let mut todos = todos.lock().unwrap();
 
-    for todo in todos.iter_mut()  {
-        if todo.id == id {
-            todo.title = payload.title.clone();
-            todo.completed = payload.completed;
-
-            return Ok(Json(todo.clone()));
-        }
-
-    }
-
-    Err(StatusCode::NOT_FOUND)
-}
-
-async fn delete_todos(
-    Path(id): Path<u32>,
-    State(todos): State<SharedTodos>,
-) -> StatusCode {
-    let mut todos = todos.lock().unwrap();
-
-    let previous_len = todos.len();
-
-    todos.retain(|todo| todo.id != id);
-
-    if todos.len() < previous_len {
-        StatusCode::NO_CONTENT
-    }else {
-        StatusCode::NOT_FOUND
-    }
-}
-
-async fn update_todos(
-    Path(id): Path<u32>,
-    State(todos): State<SharedTodos>,
-    Json(payload): Json<Todo>
-) -> Result<Json<Todo>, StatusCode> {
-    let mut todos = todos.lock().unwrap();
-
-    for todo in todos.iter_mut()  {
-        if todo.id == id {
-            todo.title = payload.title.clone();
-            todo.completed = payload.completed;
-
-            return Ok(Json(todo.clone()));
-        }
-
-    }
-
-    Err(StatusCode::NOT_FOUND)
-}
-
-async fn delete_todos(
-    Path(id): Path<u32>,
-    State(todos): State<SharedTodos>,
-) -> StatusCode {
-    let mut todos = todos.lock().unwrap();
-
-    let previous_len = todos.len();
-
-    todos.retain(|todo| todo.id != id);
-
-    if todos.len() < previous_len {
-        StatusCode::NO_CONTENT
-    }else {
-        StatusCode::NOT_FOUND
-    }
-}
