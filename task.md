@@ -22,18 +22,18 @@ As a middle-level developer, you must be able to organize the structure so the c
 
 ## Stage 3: Database & Data Persistence
 In-memory state will be lost when the server restarts. It's time to connect the application to a real database!
-- [ ] Install a real database on your computer (e.g., PostgreSQL or SQLite).
-- [ ] Add the `sqlx` (async database driver) and `dotenvy` crates to `Cargo.toml`.
-- [ ] Extract the *connection string* into a `.env` file (e.g., `DATABASE_URL=postgres://user:pass@localhost/todos`).
-- [ ] Create a database table migration schema for `todos`.
-- [ ] Replace the use of `Arc<Mutex<..>>` with a database connection pool like `sqlx::PgPool` in the *application state*.
-- [ ] Refactor all handler logic (GET, POST, PUT, DELETE) to execute *raw SQL queries* against the real database (`sqlx::query!`).
+- [x] Install a real database on your computer (e.g., PostgreSQL or SQLite).
+- [x] Add the `sqlx` (async database driver) and `dotenvy` crates to `Cargo.toml`.
+- [x] Extract the *connection string* into a `.env` file (e.g., `DATABASE_URL=postgres://user:pass@localhost/todos`).
+- [x] Create a database table migration schema for `todos`.
+- [x] Replace the use of `Arc<Mutex<..>>` with a database connection pool like `sqlx::PgPool` in the *application state*.
+- [x] Refactor all handler logic (GET, POST, PUT, DELETE) to execute *raw SQL queries* against the real database (`sqlx::query!`).
 
 ## Stage 4: Observability, Logging, & Configuration
 For a "middle" or production level, debugging using `println!` is not effective. We need structured logging.
-- [ ] Replace the `println!` macro with the standard log aggregation crates in the Rust community: `tracing` and `tracing-subscriber`.
-- [ ] Add logs using `tracing::info!`, `tracing::warn!`, and `tracing::error!` when: a new request comes in, data is successfully added, and when an unexpected error occurs.
-- [ ] Create a `Config` struct (application configuration) that loads important variables from the environment (PORT, HOST, DATABASE_URL) instead of hardcoding them (`127.0.0.1:3000`).
+- [x] Replace the `println!` macro with the standard log aggregation crates in the Rust community: `tracing` and `tracing-subscriber`.
+- [x] Add logs using `tracing::info!`, `tracing::warn!`, and `tracing::error!` when: a new request comes in, data is successfully added, and when an unexpected error occurs.
+- [x] Create a `Config` struct (application configuration) that loads important variables from the environment (PORT, HOST, DATABASE_URL) instead of hardcoding them (`127.0.0.1:3000`).
 
 ## Stage 5: Data Validation
 Never assume the data sent by the Client from the *Request Body* is always safe and valid!

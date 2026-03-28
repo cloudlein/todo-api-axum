@@ -23,3 +23,10 @@ impl IntoResponse for AppError {
         }
     }
 }
+
+impl From<sqlx::Error> for AppError {
+    fn from(inner: sqlx::Error) -> Self {
+        tracing::error!("Database error: {:?}", inner);
+        AppError::InternalServerError
+    }
+}

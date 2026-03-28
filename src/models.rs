@@ -1,11 +1,13 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct Todo {
-    pub id: u32,
+    pub id: i32,
     pub title: String,
     pub completed: bool,
 }
+
 
 #[derive(Deserialize)]
 pub struct CreateDto {
