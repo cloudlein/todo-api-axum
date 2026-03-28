@@ -15,10 +15,10 @@ As a middle-level developer, you must be able to organize the structure so the c
 
 ## Stage 2: Error Handling Best Practices
 `.unwrap()` is very dangerous in production because it will cause the program to crash (panic). We need proper error handling.
-- [ ] Learn the `IntoResponse` trait in Axum to handle *custom errors*.
-- [ ] Create an `AppError` struct/enum to catch internal errors (database errors, item not found, etc.).
-- [ ] (Optional) Use the `thiserror` crate to simplify *custom error* implementation.
-- [ ] Replace all `unwrap()` calls with `?` (the try operator) in handlers, and return relevant HTTP responses like 404 (Not Found) or 500 (Internal Server Error).
+- [x] Learn the `IntoResponse` trait in Axum to handle *custom errors*.
+- [x] Create an `AppError` struct/enum to catch internal errors (database errors, item not found, etc.).
+- [x] (Optional) Use the `thiserror` crate to simplify *custom error* implementation.
+- [x] Replace all `unwrap()` calls with `?` (the try operator) in handlers, and return relevant HTTP responses like 404 (Not Found) or 500 (Internal Server Error).
 
 ## Stage 3: Database & Data Persistence
 In-memory state will be lost when the server restarts. It's time to connect the application to a real database!
