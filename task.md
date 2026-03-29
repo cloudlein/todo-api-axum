@@ -37,10 +37,10 @@ For a "middle" or production level, debugging using `println!` is not effective.
 
 ## Stage 5: Data Validation
 Never assume the data sent by the Client from the *Request Body* is always safe and valid!
-- [ ] Add the `validator` crate to validate DTO structs, such as `CreateDto` and `UpdateTodo`.
-- [ ] Ensure the `title` input field cannot be *empty* or just contain *spaces*.
-- [ ] Ensure `title` is limited in characters (e.g., maximum 255 characters) to minimize potential abuse.
-- [ ] Return a 400 (Bad Request) response with detailed invalidity messages if the client input is not valid.
+- [x] Add the `validator` crate to validate DTO structs, such as `CreateDto` and `UpdateTodo`.
+- [x] Ensure the `title` input field cannot be *empty* or just contain *spaces*.
+- [x] Ensure `title` is limited in characters (e.g., maximum 255 characters) to minimize potential abuse.
+- [x] Return a 400 (Bad Request) response with detailed invalidity messages if the client input is not valid.
 
 ## Stage 6: Pagination & Filtering
 As data grows, fetching the *entire* table contents will burden the database and be slow.
@@ -57,6 +57,32 @@ Middle-level means understanding how to bring your program to the cloud ecosyste
 - [ ] Create a `Dockerfile` with a *multi-stage build* schema to compile the Rust application into a lightweight *binary image*.
 - [ ] Build a `docker-compose.yml` configuration file to make it easier to run your Rust API with its local database simultaneously.
 - [ ] Create a GitHub Actions workflow (e.g., `.github/workflows/rust.yml`) that includes a pipeline: *Linting* with `cargo clippy`, performance checking (*cargo check*), code formatting with `cargo fmt`, and running `cargo test` every time there is a branch/change pushed to the GitHub repository.
+
+## Stage 9: Clean Architecture Implementation
+As the codebase grows, putting database queries and business logic directly in handlers makes it difficult to maintain and test. It's time to separate concerns!
+- [ ] Understand the core layers of Clean Architecture: `Domain`, `Application` (Use Cases), and `Infrastructure`.
+- [ ] Create a `Domain` layer: Define core business entities/structs and define repository `traits` (interfaces) without depending on `sqlx` or `axum`.
+- [ ] Create an `Infrastructure` layer: Implement the repository traits using `sqlx` (e.g., `TodoRepositoryImpl` that handles actual PostgreSQL queries).
+- [ ] Create an `Application` (Service) layer: Move business logic from handlers into service structs (e.g., `TodoService`) that depend on the repository traits limit the concrete database implementations.
+- [ ] Refactor Handlers: Update Axum handlers to only parse HTTP requests, call the `TodoService` methods, and format HTTP responses.
+- [ ] Implement Dependency Injection: Inject `TodoRepositoryImpl` into `TodoService`, and pass `TodoService` to your Axum handlers via `State`.
+
+**Target Folder Structure:**
+```text
+src/
+├── domain/             # Core business models & traits/interfaces
+│   ├── models.rs       # e.g., Todo struct
+│   └── repositories.rs # e.g., TodoRepository trait
+├── application/        # Business logic (Services / Use Cases)
+│   └── todo_service.rs
+├── infrastructure/     # Database implementations & external services
+│   └── db_repository.rs # Database SQLx implementation
+├── handlers/           # Transport layer (Controllers / Presenters)
+│   └── todo_handler.rs # Axum handlers
+├── routes/             # Axum router configuration
+│   └── mod.rs
+└── main.rs             # Entry point, Dependency Injection & Server setup
+```
 
 ---
 

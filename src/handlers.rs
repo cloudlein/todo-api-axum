@@ -1,24 +1,46 @@
 use crate::into_response::AppError;
-use crate::models::{CreateDto, Todo, UpdateTodo};
+use crate::models::{CreateDto, PaginateResponse, PaginationQuery, Todo, UpdateTodo};
 use crate::AppState;
-use axum::extract::{Path, State};
+use axum::extract::{Path, Query, State};
 use axum::Json;
+use sqlx::PgPool;
 
 pub async fn root() -> &'static str {
     "Hello, world!"
 }
 
 pub async fn get_todos(
-    State(state): State<AppState>,
-) -> Result<Json<Vec<Todo>>, AppError> {
+    Query(params): Query<PaginationQuery>,
+    State(pool): State<PgPool>,
+) -> Result<Json<PaginateResponse<Todo>>, AppError> {
 
-    let todos = sqlx::query_as::<_, Todo>(
-        "SELECT id, title, completed FROM todos"
+    let page = params.page.unwrap_or(1);
+    let limit = params.limit.unwrap_or(10);
+
+    let offset = (page - 1) * limit;
+
+    // total count
+    let (total,): (i64,) = sqlx::query_as(
+        "SELECT COUNT(*) FROM todos"
     )
-        .fetch_all(&state.db)
+        .fetch_one(&pool)
         .await?;
 
-    Ok(Json(todos))
+    // fetch data
+    let todos = sqlx::query_as::<_, Todo>(
+        "SELECT id, title FROM todos ORDER BY id LIMIT $1 OFFSET $2"
+    )
+        .bind(limit as i64)
+        .bind(offset as i64)
+        .fetch_all(&pool)
+        .await?;
+
+    Ok(Json(PaginateResponse {
+        data: todos,
+        page,
+        limit,
+        total,
+    }))
 }
 pub async fn create_todos(
     State(state): State<AppState>,
