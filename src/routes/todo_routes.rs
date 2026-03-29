@@ -36,9 +36,25 @@ mod tests {
         }
 
         dotenvy::dotenv().ok();
-        let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+        let config = crate::config::Config::init();
+        let db_url = config.database_url.replace("localhost", "127.0.0.1");
 
-        let pool = PgPool::connect(&database_url).await.unwrap();
+        // Align with main.rs: 5 connections and generous timeout
+        let pool = sqlx::postgres::PgPoolOptions::new()
+            .max_connections(5)
+            .acquire_timeout(std::time::Duration::from_secs(120))
+            .connect(&db_url)
+            .await
+            .unwrap_or_else(|e| {
+                panic!("CRITICAL: Failed to connect to test database at {}. Error: {}", db_url, e);
+            });
+
+        // Ensure migrations are run in the test environment
+        sqlx::migrate!("./migrations")
+            .run(&pool)
+            .await
+            .expect("Unable to migrate the test database");
+
         TEST_POOL.set(pool.clone()).ok();
         pool
     }
