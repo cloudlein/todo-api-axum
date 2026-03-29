@@ -1,6 +1,6 @@
+use axum::Json;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use axum::Json;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::fmt::Display;
@@ -31,7 +31,7 @@ pub struct ErrorResponse<T = ()> {
     pub success: bool,
     pub code: String,
     pub message: String,
-    
+
     // Skip this field from JSON when value is None
     #[serde(skip_serializing_if = "Option::is_none")]
     pub errors: Option<T>,
@@ -56,7 +56,7 @@ pub enum AppError {
 // Helper: Format ValidationErrors into a simple HashMap of field -> [error_message]
 fn format_validation_errors(err: validator::ValidationErrors) -> HashMap<String, Vec<String>> {
     let mut errors = HashMap::new();
-    
+
     for (field, field_errors) in err.into_errors() {
         if let validator::ValidationErrorsKind::Field(validation_errors) = field_errors {
             let mut messages = Vec::new();
@@ -71,7 +71,7 @@ fn format_validation_errors(err: validator::ValidationErrors) -> HashMap<String,
             errors.insert(field.to_string(), messages);
         }
     }
-    
+
     errors
 }
 
@@ -82,11 +82,7 @@ impl IntoResponse for AppError {
         let message = self.to_string();
 
         let (status, code, errors) = match self {
-            AppError::NotFound => (
-                StatusCode::NOT_FOUND,
-                ErrorCode::NotFound.to_string(),
-                None,
-            ),
+            AppError::NotFound => (StatusCode::NOT_FOUND, ErrorCode::NotFound.to_string(), None),
             AppError::BadRequest(_) => (
                 StatusCode::BAD_REQUEST,
                 ErrorCode::BadRequest.to_string(),
@@ -120,7 +116,7 @@ impl IntoResponse for AppError {
 impl From<sqlx::Error> for AppError {
     fn from(inner: sqlx::Error) -> Self {
         tracing::error!("Database error: {:?}", inner);
-        
+
         match inner {
             sqlx::Error::RowNotFound => AppError::NotFound,
             _ => AppError::InternalServerError, // Do not leak DB error details to the client

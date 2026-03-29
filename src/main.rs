@@ -1,61 +1,70 @@
-mod models;
-mod handlers;
-mod routes;
-mod into_response;
+mod application;
 mod config;
+mod domain;
+mod handlers;
+mod infrastructure;
+mod errors;
+mod models;
+mod routes;
 
-use crate::handlers::{create_todos, delete_todos, get_todo, get_todos, root, update_todos};
-use crate::routes::todo::todo_routes;
+use std::sync::Arc;
+use crate::handlers::root;
+use crate::routes::todo_routes;
+use crate::application::todo_service::TodoService;
+use crate::infrastructure::sqlx_todo_repository::SqlxTodoRepository;
 use axum::routing::get;
 use axum::Router;
 use dotenvy::dotenv;
-use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPoolOptions;
-use sqlx::PgPool;
-use std::env;
-use std::net::SocketAddr;
 
 #[derive(Clone)]
 pub struct AppState {
-    pub db: PgPool,
+    pub todo_service: Arc<TodoService>,
 }
 
 #[tokio::main]
 async fn main() {
-
     dotenv().ok();
 
+    // Initialize logging
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
 
+    //Load Application Configuration
     let config = crate::config::Config::init();
 
-    let db_url = env::var("DATABASE_URL")
-        .expect("DATABASE_URL is not set in .env file");
-
+    // Initialize Database Connection Pool
     let pool = PgPoolOptions::new()
-    .max_connections(5)
-    .connect(&config.database_url)
-    .await
-    .expect("Unable to connect to postgresql");
+        .max_connections(5)
+        .connect(&config.database_url)
+        .await
+        .expect("Unable to connect to postgresql");
 
+    // 5. Run Database Migrations
     sqlx::migrate!("./migrations")
         .run(&pool)
         .await
         .expect("Unable to migrate the database");
 
-    let state = AppState { db: pool };
+    // Initialize Repository and Service (Dependency Injection)
+    let repository = Arc::new(SqlxTodoRepository::new(pool));
+    let service = Arc::new(TodoService::new(repository));
 
+    // Setup Application State
+    let state = AppState {
+        todo_service: service,
+    };
+
+    // Build Axum Router
     let app = Router::new()
         .route("/", get(root))
-        .nest("/api/v1/",todo_routes())
+        .nest("/api/v1/", todo_routes())
         .with_state(state);
 
-
+    // 9. Start Server
     let addr = format!("{}:{}", config.host, config.port);
     tracing::info!("Server running on http://{}", addr);
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
-

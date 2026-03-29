@@ -44,28 +44,28 @@ Never assume the data sent by the Client from the *Request Body* is always safe 
 
 ## Stage 6: Pagination & Filtering
 As data grows, fetching the *entire* table contents will burden the database and be slow.
-- [ ] Implement Pagination: Add *Query Parameters* like `?page=1&limit=10` to the `GET /todos` endpoint using the `axum::extract::Query` extractor.
-- [ ] Implement Filtering: Provide filters in `GET /todos` to fetch only completed todos or to handle search *keywords* (e.g., `?status=completed&search=learn`).
+- [x] Implement Pagination: Add *Query Parameters* like `?page=1&limit=10` to the `GET /todos` endpoint using the `axum::extract::Query` extractor.
+- [x] Implement Filtering: Provide filters in `GET /todos` to fetch only completed todos or to handle search *keywords* (e.g., `?status=completed&search=learn`).
 
 ## Stage 7: Automated Testing
 A middle-level developer does not solely test their application manually. New features can accidentally break existing ones.
-- [ ] Write **Unit Tests** to verify the functionality of small logic (validation, core algorithms).
-- [ ] Write **Integration Tests** using the built-in axum modules (and calling `router.oneshot(request)`) to simulate full HTTP requests from the front (Request) directly to the back (Response) without having to open Postman.
+- [x] Write **Unit Tests** to verify the functionality of small logic (validation, core algorithms).
+- [x] Write **Integration Tests** using the built-in axum modules (and calling `router.oneshot(request)`) to simulate full HTTP requests from the front (Request) directly to the back (Response) without having to open Postman.
 
 ## Stage 8: CI/CD & Deployment
 Middle-level means understanding how to bring your program to the cloud ecosystem.
-- [ ] Create a `Dockerfile` with a *multi-stage build* schema to compile the Rust application into a lightweight *binary image*.
-- [ ] Build a `docker-compose.yml` configuration file to make it easier to run your Rust API with its local database simultaneously.
-- [ ] Create a GitHub Actions workflow (e.g., `.github/workflows/rust.yml`) that includes a pipeline: *Linting* with `cargo clippy`, performance checking (*cargo check*), code formatting with `cargo fmt`, and running `cargo test` every time there is a branch/change pushed to the GitHub repository.
+- [x] Create a `Dockerfile` with a *multi-stage build* schema to compile the Rust application into a lightweight *binary image*.
+- [x] Build a `docker-compose.yml` configuration file to make it easier to run your Rust API with its local database simultaneously.
+- [x] Create a GitHub Actions workflow (e.g., `.github/workflows/rust.yml`) that includes a pipeline: *Linting* with `cargo clippy`, performance checking (*cargo check*), code formatting with `cargo fmt`, and running `cargo test` every time there is a branch/change pushed to the GitHub repository.
 
 ## Stage 9: Clean Architecture Implementation
 As the codebase grows, putting database queries and business logic directly in handlers makes it difficult to maintain and test. It's time to separate concerns!
-- [ ] Understand the core layers of Clean Architecture: `Domain`, `Application` (Use Cases), and `Infrastructure`.
-- [ ] Create a `Domain` layer: Define core business entities/structs and define repository `traits` (interfaces) without depending on `sqlx` or `axum`.
-- [ ] Create an `Infrastructure` layer: Implement the repository traits using `sqlx` (e.g., `TodoRepositoryImpl` that handles actual PostgreSQL queries).
-- [ ] Create an `Application` (Service) layer: Move business logic from handlers into service structs (e.g., `TodoService`) that depend on the repository traits limit the concrete database implementations.
-- [ ] Refactor Handlers: Update Axum handlers to only parse HTTP requests, call the `TodoService` methods, and format HTTP responses.
-- [ ] Implement Dependency Injection: Inject `TodoRepositoryImpl` into `TodoService`, and pass `TodoService` to your Axum handlers via `State`.
+- [x] Understand the core layers of Clean Architecture: `Domain`, `Application` (Use Cases), and `Infrastructure`.
+- [x] Create a `Domain` layer: Define core business entities/structs and define repository `traits` (interfaces) without depending on `sqlx` or `axum`.
+- [x] Create an `Infrastructure` layer: Implement the repository traits using `sqlx` (e.g., `TodoRepositoryImpl` that handles actual PostgreSQL queries).
+- [x] Create an `Application` (Service) layer: Move business logic from handlers into service structs (e.g., `TodoService`) that depend on the repository traits limit the concrete database implementations.
+- [x] Refactor Handlers: Update Axum handlers to only parse HTTP requests, call the `TodoService` methods, and format HTTP responses.
+- [x] Implement Dependency Injection: Inject `TodoRepositoryImpl` into `TodoService`, and pass `TodoService` to your Axum handlers via `State`.
 
 **Target Folder Structure:**
 ```text
