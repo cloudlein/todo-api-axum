@@ -46,7 +46,10 @@ mod tests {
             .connect(&db_url)
             .await
             .unwrap_or_else(|e| {
-                panic!("CRITICAL: Failed to connect to test database at {}. Error: {}", db_url, e);
+                panic!(
+                    "CRITICAL: Failed to connect to test database at {}. Error: {}",
+                    db_url, e
+                );
             });
 
         // Ensure migrations are run in the test environment

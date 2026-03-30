@@ -1,21 +1,21 @@
 mod application;
 mod config;
 mod domain;
+mod errors;
 mod handlers;
 mod infrastructure;
-mod errors;
 mod models;
 mod routes;
 
-use std::sync::Arc;
-use crate::handlers::root;
-use crate::routes::todo_routes;
 use crate::application::todo_service::TodoService;
+use crate::handlers::root;
 use crate::infrastructure::sqlx_todo_repository::SqlxTodoRepository;
-use axum::routing::get;
+use crate::routes::todo_routes;
 use axum::Router;
+use axum::routing::get;
 use dotenvy::dotenv;
 use sqlx::postgres::PgPoolOptions;
+use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct AppState {
